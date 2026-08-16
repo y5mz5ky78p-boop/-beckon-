@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Подтверждение геолокации</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:70px auto;padding:24px;text-align:center}
+button{font-size:18px;padding:14px 22px;border:0;border-radius:12px;cursor:pointer}
+#result{margin-top:24px;word-break:break-word}
+</style>
+</head>
+<body>
+<h1>Подтверждение геолокации</h1>
+<p>Нажми кнопку ниже, чтобы браузер запросил твоё разрешение на передачу текущей геолокации этой странице.</p>
+<button id="btn">Разрешить геолокацию</button>
+<div id="result"></div>
+
+<script>
+const btn = document.getElementById('btn');
+const result = document.getElementById('result');
+
+btn.onclick = () => {
+  if (!navigator.geolocation) {
+    result.textContent = 'Этот браузер не поддерживает геолокацию.';
+    return;
+  }
+
+  result.textContent = 'Ожидаем разрешение…';
+
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      const lat = p.coords.latitude;
+      const lon = p.coords.longitude;
+      const accuracy = Math.round(p.coords.accuracy);
+      const maps = `https://www.google.com/maps?q=${lat},${lon}`;
+
+      result.innerHTML =
+        `<p><b>Геолокация получена.</b></p>
+         <p>Координаты: ${lat}, ${lon}<br>
+         Точность: примерно ${accuracy} м</p>
+         <p><a href="${maps}" target="_blank" rel="noopener">Открыть в Google Maps</a></p>
+         <p>Эта страница ничего не отправляет на сервер.</p>`;
+    },
+    err => {
+      const messages = {
+        1: 'Доступ к геолокации запрещён.',
+        2: 'Местоположение определить не удалось.',
+        3: 'Истекло время ожидания.'
+      };
+      result.textContent = messages[err.code] || 'Не удалось получить геолокацию.';
+    },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+};
+</script>
+</body>
+</html>
